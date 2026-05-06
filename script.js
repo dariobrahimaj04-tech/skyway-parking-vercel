@@ -2,6 +2,7 @@ const DAILY_RATE = 12;
 const BOOKING_FEE = 5;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const STORAGE_KEY = "skywayParkingReservation";
+const PARKING_TYPE = "Self Uncovered";
 
 const form = document.querySelector("#reservationForm");
 const formErrors = document.querySelector("#formErrors");
@@ -51,22 +52,72 @@ const escapeHtml = (value) =>
 
 const normalizeName = (value) => value.trim().replace(/\s+/g, " ").toLowerCase();
 
+function isValidDateObject(date) {
+  return date instanceof Date && !Number.isNaN(date.getTime());
+}
+
 function dateTimeFromInputs(dateValue, timeValue) {
   if (!dateValue || !timeValue) {
     return null;
   }
 
-  const date = new Date(`${dateValue}T${timeValue}`);
-  return Number.isNaN(date.getTime()) ? null : date;
+  const dateMatch = /^(\d{4,})-(\d{2})-(\d{2})$/.exec(dateValue);
+  const timeMatch = /^(\d{2}):(\d{2})$/.exec(timeValue);
+
+  if (!dateMatch || !timeMatch) {
+    return null;
+  }
+
+  const year = Number(dateMatch[1]);
+  const month = Number(dateMatch[2]);
+  const day = Number(dateMatch[3]);
+  const hour = Number(timeMatch[1]);
+  const minute = Number(timeMatch[2]);
+
+  if (month < 1 || month > 12 || hour > 23 || minute > 59) {
+    return null;
+  }
+
+  const date = new Date(0);
+  date.setFullYear(year, month - 1, day);
+  date.setHours(hour, minute, 0, 0);
+
+  if (
+    !isValidDateObject(date) ||
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day ||
+    date.getHours() !== hour ||
+    date.getMinutes() !== minute
+  ) {
+    return null;
+  }
+
+  return date;
+}
+
+function currentDateRange() {
+  const complete = Boolean(
+    fields.checkInDate.value &&
+      fields.checkInTime.value &&
+      fields.checkOutDate.value &&
+      fields.checkOutTime.value
+  );
+
+  return {
+    complete,
+    checkIn: dateTimeFromInputs(fields.checkInDate.value, fields.checkInTime.value),
+    checkOut: dateTimeFromInputs(fields.checkOutDate.value, fields.checkOutTime.value),
+  };
 }
 
 function calculateParkingPrice(checkIn, checkOut) {
-  if (!checkIn || !checkOut || checkOut <= checkIn) {
+  if (!isValidDateObject(checkIn) || !isValidDateObject(checkOut) || checkOut <= checkIn) {
     return {
-      days: 1,
-      subtotal: DAILY_RATE,
+      days: 0,
+      subtotal: 0,
       bookingFee: BOOKING_FEE,
-      total: DAILY_RATE + BOOKING_FEE,
+      total: 0,
       validRange: false,
     };
   }
@@ -88,24 +139,39 @@ function pluralDay(days) {
 }
 
 function currentPricing() {
-  const checkIn = dateTimeFromInputs(fields.checkInDate.value, fields.checkInTime.value);
-  const checkOut = dateTimeFromInputs(fields.checkOutDate.value, fields.checkOutTime.value);
+  const { checkIn, checkOut } = currentDateRange();
   return calculateParkingPrice(checkIn, checkOut);
 }
 
 function updatePriceSummary() {
+  const range = currentDateRange();
+
+  if (range.complete && (!range.checkIn || !range.checkOut || range.checkOut <= range.checkIn)) {
+    priceSummary.duration.textContent = "Invalid date range";
+    priceSummary.subtotal.textContent = "--";
+    priceSummary.total.textContent = "--";
+    return;
+  }
+
   const pricing = currentPricing();
-  priceSummary.duration.textContent = pluralDay(pricing.days);
-  priceSummary.subtotal.textContent = money(pricing.subtotal);
-  priceSummary.total.textContent = money(pricing.total);
+  const displayPricing = pricing.validRange
+    ? pricing
+    : {
+        days: 1,
+        subtotal: DAILY_RATE,
+        total: DAILY_RATE + BOOKING_FEE,
+      };
+
+  priceSummary.duration.textContent = pluralDay(displayPricing.days);
+  priceSummary.subtotal.textContent = money(displayPricing.subtotal);
+  priceSummary.total.textContent = money(displayPricing.total);
 }
 
 function formatDateTime(date) {
   return date.toLocaleString("en-US", {
-    weekday: "short",
     year: "numeric",
-    month: "short",
-    day: "numeric",
+    month: "2-digit",
+    day: "2-digit",
     hour: "numeric",
     minute: "2-digit",
   });
@@ -156,10 +222,11 @@ function collectValidationErrors() {
     errors.push("Enter a valid email address.");
   }
 
-  const checkIn = dateTimeFromInputs(fields.checkInDate.value, fields.checkInTime.value);
-  const checkOut = dateTimeFromInputs(fields.checkOutDate.value, fields.checkOutTime.value);
+  const { complete, checkIn, checkOut } = currentDateRange();
 
-  if (checkIn && checkOut && checkOut <= checkIn) {
+  if (complete && (!checkIn || !checkOut)) {
+    errors.push("Enter valid check-in and check-out dates and times.");
+  } else if (checkIn && checkOut && checkOut <= checkIn) {
     errors.push("Check-out date and time must be after check-in date and time.");
   }
 
@@ -194,10 +261,13 @@ function showErrors(errors) {
 }
 
 function createReservation() {
-  const checkIn = dateTimeFromInputs(fields.checkInDate.value, fields.checkInTime.value);
-  const checkOut = dateTimeFromInputs(fields.checkOutDate.value, fields.checkOutTime.value);
+  const { checkIn, checkOut } = currentDateRange();
   const pricing = calculateParkingPrice(checkIn, checkOut);
   const acceptedAt = new Date();
+
+  if (!pricing.validRange) {
+    throw new Error("Invalid parking date range.");
+  }
 
   return {
     reservationId: randomReservationId(),
@@ -210,7 +280,7 @@ function createReservation() {
     licensePlate: getFormValue("licensePlate").toUpperCase(),
     checkInISO: checkIn.toISOString(),
     checkOutISO: checkOut.toISOString(),
-    parkingType: fields.parkingType.value,
+    parkingType: PARKING_TYPE,
     signatureName: getFormValue("signatureName"),
     acceptedAtISO: acceptedAt.toISOString(),
     pricing,
@@ -225,15 +295,24 @@ function renderReceipt(reservation) {
   const checkIn = new Date(reservation.checkInISO);
   const checkOut = new Date(reservation.checkOutISO);
   const acceptedAt = new Date(reservation.acceptedAtISO);
+  const pricing = calculateParkingPrice(checkIn, checkOut);
+
+  if (!pricing.validRange) {
+    localStorage.removeItem(STORAGE_KEY);
+    showErrors(["Saved reservation date range is invalid. Please submit a new reservation."]);
+    return false;
+  }
+
   const vehicle = `${reservation.vehicleYear} ${reservation.vehicleMake} ${reservation.vehicleModel}`;
-  const daysText = pluralDay(reservation.pricing.days);
+  const daysText = pluralDay(pricing.days);
+  const safeVehicle = escapeHtml(vehicle);
   const safe = Object.fromEntries(
     Object.entries(reservation).map(([key, value]) => [key, escapeHtml(value)])
   );
 
   receipt.innerHTML = `
-    <div class="receipt-top">
-      <div>
+    <div class="receipt-intro">
+      <div class="receipt-intro-copy">
         <div class="receipt-brand">
           <img src="assets/logo.png" alt="Skyway Parking logo" class="receipt-logo" />
           <div>
@@ -241,55 +320,74 @@ function renderReceipt(reservation) {
             <strong>Skyway Parking</strong>
           </div>
         </div>
-        <h2>Thank you ${safe.fullName}! Your airport parking has been booked and confirmed!</h2>
-      </div>
-      <div>
-        <span class="receipt-status">Open</span>
+        <p class="receipt-thank-you">Thank you ${safe.fullName}! Your airport parking has been booked and confirmed!</p>
       </div>
     </div>
 
-    <section class="receipt-section">
-      <h3>Reservation Overview</h3>
-      <div class="receipt-grid">
-        <div class="receipt-line"><strong>Reservation ID</strong><span>${safe.reservationId}</span></div>
-        <div class="receipt-line"><strong>Reservation Made By</strong><span>${safe.fullName}</span></div>
-        <div class="receipt-line"><strong>Reservation Status</strong><span>Open</span></div>
-        <div class="receipt-line"><strong>Message</strong><span>We have sent you a copy of this transaction to the email provided on checkout.</span></div>
-      </div>
-    </section>
+    <section class="receipt-overview">
+      <h2 class="receipt-overview-title">Reservation Overview</h2>
 
-    <section class="receipt-section">
-      <h3>Parking Lot Details</h3>
-      <div class="receipt-grid">
-        <div class="receipt-line"><strong>Parking Lot</strong><span>Skyway Parking</span></div>
-        <div class="receipt-line"><strong>Address</strong><span>8501 Inkster Rd., Taylor, MI, US, 48180</span></div>
-        <div class="receipt-line"><strong>Phone</strong><span>313-254-2699</span></div>
-        <div class="receipt-line"><strong>Directions</strong><span><a href="https://www.google.com/maps/search/?api=1&query=8501%20Inkster%20Rd%2C%20Taylor%2C%20MI%2048180" target="_blank" rel="noopener">Get Directions</a></span></div>
-      </div>
-    </section>
+      <div class="receipt-main-grid">
+        <div class="receipt-left-column">
+          <section class="receipt-block">
+            <h3>Reservation Details</h3>
+            <div class="receipt-line"><strong>Reservation ID</strong><span>${safe.reservationId}</span></div>
+            <div class="receipt-line"><strong>Reservation Made By</strong><span>${safe.fullName}</span></div>
+            <div class="receipt-line"><strong>Reservation Status</strong><span>Open</span></div>
+            <p class="receipt-copy">We have sent you a copy of this transaction to the email provided on checkout.</p>
+          </section>
 
-    <section class="receipt-section">
-      <h3>Your Parking Details</h3>
-      <div class="receipt-grid">
-        <div class="receipt-line"><strong>Person Parking</strong><span>${safe.fullName}</span></div>
-        <div class="receipt-line"><strong>Vehicle</strong><span>${escapeHtml(vehicle)}</span></div>
-        <div class="receipt-line"><strong>License Plate</strong><span>${safe.licensePlate}</span></div>
-        <div class="receipt-line"><strong>Check-in</strong><span>${escapeHtml(formatDateTime(checkIn))}</span></div>
-        <div class="receipt-line"><strong>Check-out</strong><span>${escapeHtml(formatDateTime(checkOut))}</span></div>
-        <div class="receipt-line"><strong>Parking Duration</strong><span>${daysText}</span></div>
-        <div class="receipt-line"><strong>Parking Type</strong><span>${safe.parkingType}</span></div>
-      </div>
-    </section>
+          <section class="receipt-block">
+            <h3>Parking Lot Details</h3>
+            <div class="receipt-lot-details">
+              <img src="assets/logo.png" alt="Skyway Parking logo" class="receipt-lot-logo" />
+              <div>
+                <strong>Skyway Parking</strong>
+                <span>8501 Inkster Rd., Taylor, MI, US, 48180</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=8501%20Inkster%20Rd%2C%20Taylor%2C%20MI%2048180" target="_blank" rel="noopener">Get Directions</a>
+                <span>313-254-2699</span>
+              </div>
+            </div>
+          </section>
 
-    <section class="receipt-section">
-      <h3>Payment Breakdown</h3>
-      <div class="receipt-line"><strong>Parking Price (${daysText})</strong><span>${money(reservation.pricing.subtotal)}</span></div>
-      <div class="receipt-line"><strong>Booking Fee</strong><span>$5.00</span></div>
-      <div class="receipt-line receipt-total"><strong>Total</strong><span>${money(reservation.pricing.total)}</span></div>
-      <div class="receipt-line"><strong>You Paid</strong><span>${money(reservation.pricing.total)}</span></div>
-      <p class="receipt-note">You were charged ${money(reservation.pricing.total)} USD for this transaction.</p>
-      <div class="receipt-line"><strong>Remaining Due at Parking Lot</strong><span>$0.00</span></div>
-      <p class="receipt-note">You must show a printed copy of your receipt or proof of your reservation at the parking lot.</p>
+          <section class="receipt-block">
+            <h3>Your Parking Details</h3>
+            <div class="receipt-line"><strong>Person Parking</strong><span>${safe.fullName}</span></div>
+            <div class="receipt-line"><strong>Vehicle</strong><span>${safeVehicle}</span></div>
+            <div class="receipt-line"><strong>License Plate</strong><span>${safe.licensePlate}</span></div>
+            <div class="receipt-line"><strong>Check-in</strong><span>${escapeHtml(formatDateTime(checkIn))}</span></div>
+            <div class="receipt-line"><strong>Check-out</strong><span>${escapeHtml(formatDateTime(checkOut))}</span></div>
+            <div class="receipt-line"><strong>Parking Duration</strong><span>${daysText}</span></div>
+            <div class="receipt-line"><strong>Parking Type</strong><span>${PARKING_TYPE}</span></div>
+            <p class="receipt-proof-note">You must show a printed copy of your receipt at the parking lot.</p>
+          </section>
+        </div>
+
+        <aside class="payment-card">
+          <h3>Payment Breakdown</h3>
+          <div class="payment-row">
+            <span>Parking Price (${daysText})</span>
+            <strong>${money(pricing.subtotal)}</strong>
+          </div>
+          <div class="payment-row">
+            <span>Booking Fee</span>
+            <strong>$5.00</strong>
+          </div>
+          <div class="payment-row payment-total">
+            <span>Total</span>
+            <strong>${money(pricing.total)}</strong>
+          </div>
+          <div class="payment-row">
+            <span>You Paid</span>
+            <strong>${money(pricing.total)}</strong>
+          </div>
+          <p class="payment-copy">You were charged ${money(pricing.total)} USD for this transaction.</p>
+          <div class="payment-row">
+            <span>Remaining Due at Parking Lot</span>
+            <strong>$0.00</strong>
+          </div>
+        </aside>
+      </div>
     </section>
 
     <section class="receipt-section">
@@ -307,7 +405,7 @@ function renderReceipt(reservation) {
         <div class="receipt-line"><strong>Name</strong><span>${safe.fullName}</span></div>
         <div class="receipt-line"><strong>Phone</strong><span>${safe.phone}</span></div>
         <div class="receipt-line"><strong>Email</strong><span>${safe.email}</span></div>
-        <div class="receipt-line"><strong>Vehicle year/make/model</strong><span>${escapeHtml(vehicle)}</span></div>
+        <div class="receipt-line"><strong>Vehicle year/make/model</strong><span>${safeVehicle}</span></div>
         <div class="receipt-line"><strong>License plate</strong><span>${safe.licensePlate}</span></div>
         <div class="receipt-line"><strong>Signature name</strong><span>${safe.signatureName}</span></div>
         <div class="receipt-line"><strong>Agreement accepted timestamp</strong><span>${escapeHtml(formatTimestamp(acceptedAt))}</span></div>
@@ -338,6 +436,7 @@ function renderReceipt(reservation) {
   reservationSection.classList.add("is-hidden");
   confirmation.classList.remove("is-hidden");
   confirmation.scrollIntoView({ behavior: "smooth", block: "start" });
+  return true;
 }
 
 function handleSubmit(event) {
@@ -349,9 +448,18 @@ function handleSubmit(event) {
     return;
   }
 
-  const reservation = createReservation();
+  let reservation;
+
+  try {
+    reservation = createReservation();
+  } catch {
+    showErrors(["Check-out date and time must be after check-in date and time."]);
+    return;
+  }
+
   saveReservation(reservation);
   form.reset();
+  fields.parkingType.value = PARKING_TYPE;
   updatePriceSummary();
   window.history.replaceState(null, "", "#confirmation");
   renderReceipt(reservation);
@@ -363,6 +471,7 @@ function startNewReservation() {
   confirmation.classList.add("is-hidden");
   reservationSection.classList.remove("is-hidden");
   form.reset();
+  fields.parkingType.value = PARKING_TYPE;
   updatePriceSummary();
   window.history.replaceState(null, "", "#reservation");
   document.querySelector("#reservation").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -435,7 +544,9 @@ function restoreSavedReceipt() {
   }
 
   try {
-    renderReceipt(JSON.parse(saved));
+    if (!renderReceipt(JSON.parse(saved))) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
@@ -454,5 +565,6 @@ lateEstimateButton.addEventListener("click", updateLateEstimate);
 document.querySelector("#scheduledReturn").addEventListener("input", updateLateEstimate);
 document.querySelector("#actualReturn").addEventListener("input", updateLateEstimate);
 
+fields.parkingType.value = PARKING_TYPE;
 updatePriceSummary();
 restoreSavedReceipt();
