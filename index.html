@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Reserve self-uncovered DTW airport parking with Skyway Parking near Detroit Metro Airport."
+    />
+    <title>Skyway Parking | DTW Airport Parking</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#top" aria-label="Skyway Parking home">
+          <img src="assets/logo.png" alt="Skyway Parking logo" class="brand-logo" />
+          <span>
+            <strong>Skyway Parking</strong>
+            <small>DTW Airport Parking</small>
+          </span>
+        </a>
+
+        <nav class="main-nav" aria-label="Primary navigation">
+          <a href="#about">About</a>
+          <a href="#reservation">Reserve</a>
+          <a href="#late-return">Late Returns</a>
+          <a href="#details">Arrival Info</a>
+        </nav>
+
+        <div class="header-actions">
+          <a class="phone-link" href="tel:3132542699">Call 313-254-2699</a>
+          <a class="button button-primary" href="#reservation">Book Parking</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Detroit Metro Airport / DTW</p>
+            <h1>Reserve DTW Airport Parking with Skyway Parking</h1>
+            <p class="hero-description">
+              Secure self-uncovered airport parking near Detroit Metro Airport with 24/7
+              on-demand shuttle service.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#reservation">Book Parking</a>
+              <a class="button button-secondary" href="tel:3132542699">Call Now</a>
+            </div>
+
+            <div class="hero-trust-badges" aria-label="Skyway Parking trust points">
+              <span>$12 Daily Rate</span>
+              <span>$5 Booking Fee</span>
+              <span>24/7 Shuttle</span>
+              <span>DTW Airport Parking</span>
+              <span>8501 Inkster Rd.</span>
+            </div>
+          </div>
+
+          <aside class="hero-booking-card" aria-label="Skyway Parking booking summary">
+            <div class="hero-card-brand">
+              <img src="assets/logo.png" alt="Skyway Parking logo" class="hero-logo" />
+              <div>
+                <p class="card-eyebrow">Booking Summary</p>
+                <h2>Skyway Parking</h2>
+              </div>
+            </div>
+
+            <div class="hero-rate">
+              <span>$12</span>
+              <strong>per day</strong>
+            </div>
+
+            <dl class="hero-card-list">
+              <div>
+                <dt>Address</dt>
+                <dd>8501 Inkster Rd., Taylor, MI</dd>
+              </div>
+              <div>
+                <dt>Booking fee</dt>
+                <dd>$5 fixed fee</dd>
+              </div>
+              <div>
+                <dt>Transportation</dt>
+                <dd>24/7 on-demand shuttle</dd>
+              </div>
+              <div>
+                <dt>Airport</dt>
+                <dd>DTW airport parking</dd>
+              </div>
+            </dl>
+
+            <a class="button button-primary hero-card-button" href="#reservation">Reserve Now</a>
+          </aside>
+        </div>
+      </section>
+
+      <section class="info-band" id="about">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Self Uncovered Parking</p>
+            <h2>Airport parking built for clear plans and easy shuttle access.</h2>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>Near DTW</h3>
+              <p>Park at 8501 Inkster Rd., Taylor, MI 48180 for Detroit Metro Airport travel.</p>
+            </article>
+            <article class="feature-card">
+              <h3>On-Demand Shuttle</h3>
+              <p>24/7 transportation service helps you move between the parking lot and airport.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Pre-Paid Receipt</h3>
+              <p>Your completed reservation creates a printable receipt for parking lot check-in.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="reservation-section" id="reservation">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Reserve Parking</p>
+            <h2>Book your Skyway Parking reservation.</h2>
+          </div>
+
+          <div class="booking-layout">
+            <form class="booking-form" id="reservationForm" novalidate>
+              <div class="form-brand">
+                <img src="assets/logo.png" alt="Skyway Parking logo" class="form-logo" />
+                <div>
+                  <strong>Complete Your Reservation</strong>
+                  <span>Skyway Parking - Self Uncovered - $12/day</span>
+                </div>
+              </div>
+
+              <fieldset class="form-section">
+                <legend><span>1</span>Customer Information</legend>
+                <div class="field-grid">
+                  <label>
+                    Full name
+                    <input type="text" id="fullName" name="fullName" autocomplete="name" required />
+                  </label>
+                  <label>
+                    Phone number
+                    <input type="tel" id="phone" name="phone" autocomplete="tel" required />
+                  </label>
+                  <label class="wide-field">
+                    Email address
+                    <input type="email" id="email" name="email" autocomplete="email" required />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-section">
+                <legend><span>2</span>Vehicle Information</legend>
+                <div class="field-grid">
+                  <label>
+                    Vehicle year
+                    <input type="text" id="vehicleYear" name="vehicleYear" inputmode="numeric" required />
+                  </label>
+                  <label>
+                    Vehicle make
+                    <input type="text" id="vehicleMake" name="vehicleMake" required />
+                  </label>
+                  <label>
+                    Vehicle model
+                    <input type="text" id="vehicleModel" name="vehicleModel" required />
+                  </label>
+                  <label>
+                    License plate
+                    <input type="text" id="licensePlate" name="licensePlate" required />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-section">
+                <legend><span>3</span>Parking Dates &amp; Times</legend>
+                <div class="field-grid">
+                  <label>
+                    Check-in date
+                    <input type="date" id="checkInDate" name="checkInDate" required />
+                  </label>
+                  <label>
+                    Check-in time
+                    <input type="time" id="checkInTime" name="checkInTime" required />
+                  </label>
+                  <label>
+                    Check-out date
+                    <input type="date" id="checkOutDate" name="checkOutDate" required />
+                  </label>
+                  <label>
+                    Check-out time
+                    <input type="time" id="checkOutTime" name="checkOutTime" required />
+                  </label>
+                  <label class="wide-field">
+                    Parking type
+                    <input type="text" id="parkingType" name="parkingType" value="Self Uncovered" readonly />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-section">
+                <legend><span>4</span>Release Agreement</legend>
+                <div class="agreement-box">
+                  <p>
+                    "In consideration of the privilege to park the vehicle described for the time
+                    frame listed below in the parking lot of the SkyWay located at 8501 Inkster Rd
+                    (Detroit Metro Airport), Taylor, Michigan 48180, the undersigned does hereby
+                    release and forever discharge SkyWay, their subsidiaries, affiliates, officers,
+                    directors, employees, and assignments from claims, loss, or damage to such
+                    vehicle from any cause whatsoever.
+                  </p>
+                  <p>
+                    I understand that this is a public parking lot and that access cannot be
+                    conveyed. I will notify the hotel when returning the vehicle. I further agree
+                    that any vehicle found parked in unauthorized areas, in a driveway, or in any
+                    other area not marked as a parking space will be towed to a storage facility at
+                    the expense of the owner."
+                  </p>
+                </div>
+
+                <label class="check-row">
+                  <input type="checkbox" id="agreementAccepted" name="agreementAccepted" required />
+                  I agree to the release / parking agreement.
+                </label>
+              </fieldset>
+
+              <fieldset class="form-section">
+                <legend><span>5</span>Signature &amp; Confirmation</legend>
+                <label>
+                  Signature name
+                  <input
+                    type="text"
+                    id="signatureName"
+                    name="signatureName"
+                    autocomplete="name"
+                    placeholder="Type your full name"
+                    required
+                  />
+                </label>
+              </fieldset>
+
+              <div class="form-errors" id="formErrors" role="alert" aria-live="polite"></div>
+
+              <button class="button button-primary submit-button" type="submit">
+                Submit Reservation
+              </button>
+            </form>
+
+            <aside class="price-card" aria-label="Live price summary">
+              <div class="price-card-header">
+                <img src="assets/logo.png" alt="Skyway Parking logo" class="summary-logo" />
+                <div>
+                  <p class="card-eyebrow">Live Estimate</p>
+                  <h3>Your Trip Summary</h3>
+                </div>
+              </div>
+              <div class="summary-route">
+                <strong>Skyway Parking</strong>
+                <span>8501 Inkster Rd., Taylor, MI</span>
+              </div>
+              <dl class="price-list">
+                <div>
+                  <dt>Parking duration</dt>
+                  <dd id="summaryDuration">1 Day of parking</dd>
+                </div>
+                <div>
+                  <dt>Daily parking rate</dt>
+                  <dd>$12.00</dd>
+                </div>
+                <div>
+                  <dt>Parking subtotal</dt>
+                  <dd id="summarySubtotal">$12.00</dd>
+                </div>
+                <div>
+                  <dt>Booking fee</dt>
+                  <dd>$5.00</dd>
+                </div>
+                <div class="total-row">
+                  <dt>Total due</dt>
+                  <dd id="summaryTotal">$17.00</dd>
+                </div>
+                <div>
+                  <dt>Remaining due at parking lot</dt>
+                  <dd>$0.00</dd>
+                </div>
+              </dl>
+              <p class="summary-note">
+                Partial parking days count as full days. The booking fee is charged once on
+                normal reservations.
+              </p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="confirmation-section is-hidden" id="confirmation" aria-live="polite">
+        <div class="container">
+          <div class="receipt-actions no-print">
+            <button class="button button-primary" type="button" id="printReceipt">Print Receipt</button>
+            <button class="button button-secondary" type="button" id="newReservation">
+              Start New Reservation
+            </button>
+          </div>
+          <div class="receipt-paper" id="receipt"></div>
+        </div>
+      </section>
+
+      <section class="late-section" id="late-return">
+        <div class="container late-grid">
+          <div>
+            <p class="eyebrow">Late Return Policy</p>
+            <h2>Late returns are calculated without another booking fee.</h2>
+            <ul class="policy-list">
+              <li><strong>First hour late:</strong> complimentary</li>
+              <li><strong>1-4 hours late:</strong> $6</li>
+              <li><strong>More than 4 hours late:</strong> $12</li>
+              <li><strong>Additional late days:</strong> $12/day</li>
+              <li><strong>Booking fee:</strong> no additional booking fee for late returns</li>
+            </ul>
+          </div>
+
+          <div class="late-estimator">
+            <h3>Late Return Estimator</h3>
+            <label>
+              Scheduled return
+              <input type="datetime-local" id="scheduledReturn" />
+            </label>
+            <label>
+              Actual return
+              <input type="datetime-local" id="actualReturn" />
+            </label>
+            <button class="button button-secondary" type="button" id="estimateLateFee">
+              Estimate Late Charge
+            </button>
+            <div class="late-result" id="lateResult" aria-live="polite">
+              Enter return times to estimate any additional parking charge.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="details-section" id="details">
+        <div class="container details-grid">
+          <div>
+            <p class="eyebrow">Parking Lot Details</p>
+            <h2>Skyway Parking</h2>
+            <p>8501 Inkster Rd., Taylor, MI, US, 48180</p>
+            <p><a href="tel:3132542699">313-254-2699</a></p>
+            <p>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=8501%20Inkster%20Rd%2C%20Taylor%2C%20MI%2048180"
+                target="_blank"
+                rel="noopener"
+              >
+                Get Directions
+              </a>
+            </p>
+          </div>
+          <div>
+            <h3>Transportation</h3>
+            <p>24/7 on-demand shuttle service.</p>
+            <h3>Arrival and Airport Pickup Info</h3>
+            <p>
+              Upon arriving, before parking, stop in the main office. Register at the front desk.
+              Have your ID and your plate number ready. Once you have registered, park in any open
+              parking spot. Staff will assist with the shuttle.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <img src="assets/logo.png" alt="Skyway Parking logo" class="footer-logo" />
+        <p>Skyway Parking - 8501 Inkster Rd., Taylor, MI 48180 - 313-254-2699</p>
+      </div>
+    </footer>
+  </body>
+</html>
