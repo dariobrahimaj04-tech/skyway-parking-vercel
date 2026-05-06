@@ -69,3 +69,4 @@ Use these Vercel settings:
 ## Notes
 
 The reservation flow is a front-end simulation. It calculates the parking price, validates the form, saves the submitted reservation to `localStorage`, and renders a printable confirmation receipt.
+Deployment refresh.
